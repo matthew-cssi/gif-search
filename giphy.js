@@ -6,7 +6,7 @@ let url = 'http://api.giphy.com/v1/gifs/search';
 // This function fetches a gif that matches the given searchTerm.
 function fetchGif(searchTerm) {
   // This sets up our Giphy search with the given searchTerm.
-  let query = `${url}?api_key=${apiKey}&q=${searchTerm}&limit=1`;
+  let query = `${url}?api_key=${apiKey}&q=${searchTerm}&limit=8`;
 
   // Fetch the data from the Giphy API...
   window.fetch(query).then(data => {
@@ -16,9 +16,10 @@ function fetchGif(searchTerm) {
   }).then(json => {
     // Then get the correct URL from the JSON and pass it to createImage.
     let results = json.data;
-    let result = results[0];
-    let imageUrl = result.images.downsized.url;
-    createImage(imageUrl);
+    results.forEach(result => {
+      let imageUrl = result.images.downsized.url;
+      createImage(imageUrl);
+    });
   });
 }
 
@@ -30,9 +31,18 @@ function createImage(url) {
 }
 
 // Set up the button and input box to listen for user input.
+let form = document.querySelector('#search-form');
 let go = document.querySelector('#go');
 let input = document.querySelector('#q');
-go.addEventListener('click', e => {
+form.addEventListener('submit', e => {
+  e.preventDefault();  // Don't refresh the page.
   let q = input.value;
-  fetchGif(q);
+  if (q) {
+    // Remove all the images.
+    document.querySelectorAll('img').forEach(img => {
+      img.remove();
+    })
+    input.value = '';  // Clear the input.
+    fetchGif(q);  // Fetch the query.
+  }
 });
